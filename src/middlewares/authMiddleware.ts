@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import ApiError from '../utils/apiError';
-import { User } from '../models/UserModel';
+import User from '../models/UserModel.model';
 
 // Extend the Express Request interface to include the user property
 declare global {
@@ -9,8 +9,10 @@ declare global {
         interface Request {
             user?: {
                 id: number;
-                username: string;
+                first_name: string;
+                last_name: string;
                 email: string;
+                phone: string;
             };
         }
     }
@@ -56,8 +58,10 @@ export const protect = async (
         // Attach user to request object
         req.user = {
             id: user.id,
-            username: user.name,
-            email: user.email
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone: user.phone,
         };
 
         next();

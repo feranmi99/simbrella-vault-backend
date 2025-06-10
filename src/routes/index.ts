@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Sequelize } from 'sequelize-typescript';
 import { UserController } from '../controllers/UserController';
 import { RegisterValidator } from '../validators/RegisterValidator'; // Assuming you have this
+import { LoginValidator } from '../validators/LoginValidator';
 
 export function router(sequelize: Sequelize) {
     const router = Router();
@@ -12,7 +13,12 @@ export function router(sequelize: Sequelize) {
     // router.get('/users', userController.getAllUsers.bind(userController));
 
     // Create user
-    // router.post('/users', RegisterValidator, userController.createUser.bind(userController));
+    router.post('/register', RegisterValidator, userController.createUser.bind(userController));
+
+        // ✅ Login
+    // router.post('/login', LoginValidator, userController.loginUser.bind(userController));
+    router.post('/login', LoginValidator, userController.loginUser.bind(userController));
+
 
     // Get user by ID
     // router.get('/users/:id', userController.getUserById.bind(userController));

@@ -1,53 +1,50 @@
-// services/UserService.ts
-import { User } from '../models/UserModel';
+import bcrypt from 'bcryptjs';
+import User from '../models/UserModel.model';
+import jwt from 'jsonwebtoken';
 
 export class UserService {
-    /**
-     * Get all users
-     */
-    async getAllUsers() {
-        return await User.findAll();
-    }
+  async getAllUsers() {
+    return await User.findAll();
+  }
 
-    /**
-     * Create a new user
-     * @param userData User data to create
-     */
-    async createUser(userData: any) {
-        return await User.create(userData); 
-    }
+  async createUser(userData: any) {
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    return await User.create({ ...userData, password: hashedPassword });
+  }
 
-    /**
-     * Get user by ID
-     * @param userId User ID
-     */
-    async getUserById(userId: number) {
-        return await User.findByPk(userId);
-    }
+  async getUserById(userId: number) {
+    return await User.findByPk(userId);
+  }
 
-    /**
-     * Update user by ID
-     * @param userId User ID
-     * @param userData Updated user data
-     */
-    async updateUser(userId: number, userData: any) {
-        const user = await User.findByPk(userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
-        return await user.update(userData);
-    }
+  async updateUser(userId: number, userData: any) {
+    const user = await User.findByPk(userId);
+    if (!user) throw new Error('User not found');
 
-    /**
-     * Delete user by ID
-     * @param userId User ID
-     */
-    async deleteUser(userId: number) {
-        const user = await User.findByPk(userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
-        await user.destroy();
-        return { message: 'User deleted successfully' };
-    }
+    return await user.update(userData);
+  }
+
+  async deleteUser(userId: number) {
+    const user = await User.findByPk(userId);
+    if (!user) throw new Error('User not found');
+
+    await user.destroy();
+    return { message: 'User deleted successfully' };
+  }
+
+  async loginUser(email: string, password: string) {
+    const user = await User.findOne({ where: { email } });
+    if (!user) return null;
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return null;
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET as string,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+    );
+    const { password: _, ...userWithoutPassword } = user.get({ plain: true });
+
+    return { user: userWithoutPassword, token };
+  }
 }

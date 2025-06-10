@@ -1,7 +1,7 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'users' })
-export class User extends Model {
+export default class User extends Model<User> {
     @Column({
         type: DataType.INTEGER,
         primaryKey: true,
@@ -13,7 +13,13 @@ export class User extends Model {
         type: DataType.STRING(100),
         allowNull: false,
     })
-    name!: string;
+    first_name!: string;
+
+    @Column({
+        type: DataType.STRING(100),
+        allowNull: false,
+    })
+    last_name!: string;
 
     @Column({
         type: DataType.STRING(100),
@@ -21,6 +27,12 @@ export class User extends Model {
         allowNull: false,
     })
     email!: string;
+
+    @Column({
+        type: DataType.STRING(20),
+        allowNull: false,
+    })
+    phone!: string;
 
     @Column({
         type: DataType.STRING,
