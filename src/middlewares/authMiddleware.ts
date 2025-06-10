@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import ApiError from '../utils/apiError';
-import User from '../models/UserModel.model';
+import User, { UserRole } from '../models/UserModel.model';
 
 // Extend the Express Request interface to include the user property
 declare global {
@@ -13,6 +13,7 @@ declare global {
                 last_name: string;
                 email: string;
                 phone: string;
+                role: UserRole.USER | UserRole.ADMIN;
             };
         }
     }
@@ -62,6 +63,7 @@ export const protect = async (
             last_name: user.last_name,
             email: user.email,
             phone: user.phone,
+            role: user.role,
         };
 
         next();

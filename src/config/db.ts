@@ -21,7 +21,8 @@ export async function testConnection(): Promise<void> {
 
         // Sync models with database
         if (process.env.NODE_ENV === 'development') {
-            await sequelize.sync({ alter: true });
+            // await sequelize.sync({ alter: true });
+            await sequelize.sync();
         }
     } catch (error) {
         console.error('❌ Sequelize connection error:', error);
