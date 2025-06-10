@@ -1,5 +1,11 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
+
+export enum UserRole {
+    USER = 'user',
+    ADMIN = 'admin',
+}
+
 @Table({ tableName: 'users' })
 export default class User extends Model<User> {
     @Column({
@@ -30,6 +36,7 @@ export default class User extends Model<User> {
 
     @Column({
         type: DataType.STRING(20),
+        unique: true,
         allowNull: false,
     })
     phone!: string;
@@ -39,4 +46,11 @@ export default class User extends Model<User> {
         allowNull: false,
     })
     password!: string;
+
+    @Column({
+        type: DataType.ENUM(...Object.values(UserRole)), // Sequelize ENUM for role
+        defaultValue: UserRole.USER, // Default role is 'user'
+        allowNull: false,
+    })
+    role!: UserRole;
 }

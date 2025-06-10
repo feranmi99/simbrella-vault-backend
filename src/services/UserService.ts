@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/UserModel.model';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export class UserService {
   async getAllUsers() {
@@ -38,11 +41,16 @@ export class UserService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return null;
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined');
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+      (process.env.JWT_SECRET || 'mysecretkey') as jwt.Secret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' } as jwt.SignOptions
     );
+
     const { password: _, ...userWithoutPassword } = user.get({ plain: true });
 
     return { user: userWithoutPassword, token };

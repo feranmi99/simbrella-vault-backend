@@ -20,8 +20,29 @@ export class UserController {
         try {
             const user = await this.userService.createUser(req.body);
             res.status(201).json(user);
-        } catch (error) {
-            next(error);
+        } catch (error: any) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                const field = error.errors?.[0]?.path;
+                const value = error.errors?.[0]?.value;
+                res.status(409).json({
+                    message: `The ${field} "${value}" is already in use. Please use a different one.`,
+                });
+                return;
+            }
+
+            if (error.name === 'SequelizeValidationError') {
+                const messages = error.errors.map((e: any) => e.message);
+                res.status(400).json({
+                    message: 'Invalid user input',
+                    errors: messages,
+                });
+                return;
+            }
+
+            // Fallback for unknown errors
+            res.status(500).json({
+                message: 'Something went wrong while creating the user.',
+            });
         }
     }
 

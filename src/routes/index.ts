@@ -9,16 +9,11 @@ export function router(sequelize: Sequelize) {
     const router = Router();
     const userController = new UserController();
 
-    // Get all users
-    // router.get('/users', userController.getAllUsers.bind(userController));
-
-    // Create user
     router.post('/register', RegisterValidator, userController.createUser.bind(userController));
-
-        // ✅ Login
-    // router.post('/login', LoginValidator, userController.loginUser.bind(userController));
     router.post('/login', LoginValidator, userController.loginUser.bind(userController));
 
+    // Get all users
+    // router.get('/users', userController.getAllUsers.bind(userController));
 
     // Get user by ID
     // router.get('/users/:id', userController.getUserById.bind(userController));
