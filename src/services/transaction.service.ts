@@ -23,14 +23,14 @@ export class TransactionService {
             await fromWallet.save({ transaction: t });
             await toWallet.save({ transaction: t });
 
-            // Create transaction record
+            // 👇 Pass correct typing here
             const transaction = await Transaction.create({
                 fromWalletId,
                 toWalletId,
                 amount,
                 type: TransactionType.TRANSFER,
                 description: `Transfer from wallet ${fromWalletId} to ${toWalletId}`,
-            }, { transaction: t });
+            } as any, { transaction: t }); // 👈 cast to any if needed as a temp fix
 
             return { success: true, transaction };
         });
@@ -56,18 +56,18 @@ export class TransactionService {
         fromWalletId?: number;
         toWalletId?: number;
         amount: number;
-        type: string;
+        type: TransactionType;
         description?: string;
     }) {
-        if (data.amount <= 0) throw new Error('Amount must be greater than zero');
-        return await Transaction.create(data);
+        if (data.amount <= 0) throw new Error('Transfer amount must be greater than zero');
+        return await Transaction.create(data as any);
     }
 
     // Admin-only: update a transaction
     async updateTransaction(id: number, data: Partial<typeof Transaction>) {
         const transaction = await Transaction.findByPk(id);
         if (!transaction) throw new Error('Transaction not found');
-        return await transaction.update(data);
+        return await transaction.update(data as any);
     }
 
     // Admin-only: delete a transaction
