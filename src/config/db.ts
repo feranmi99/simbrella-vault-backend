@@ -1,7 +1,4 @@
 import { Sequelize } from 'sequelize-typescript';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const sequelize = new Sequelize({
     database: process.env.DB_NAME || 'simbrella-vault',
@@ -22,7 +19,8 @@ export async function testConnection(): Promise<void> {
         // Sync models with database
         if (process.env.NODE_ENV === 'development') {
             // await sequelize.sync({ alter: true });
-            await sequelize.sync();
+            // await sequelize.sync();
+            sequelize.sync({ force: false, alter: false });
         }
     } catch (error) {
         console.error('❌ Sequelize connection error:', error);
