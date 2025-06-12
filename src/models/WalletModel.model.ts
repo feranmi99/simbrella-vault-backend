@@ -10,9 +10,11 @@ import {
   AllowNull,
   Default,
   BeforeCreate,
+  HasMany,
 } from 'sequelize-typescript';
 import User from './UserModel.model';
 import crypto from 'crypto';
+import Transaction from './TransactionMOdel.model';
 
 @Table({ tableName: 'wallets', timestamps: true })
 class Wallet extends Model {
@@ -33,6 +35,10 @@ class Wallet extends Model {
   @Column(DataType.DECIMAL(18, 2))
   balance!: number;
 
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  name?: string;
+
   @AllowNull(true)
   @Column(DataType.STRING)
   currency?: string;
@@ -48,13 +54,15 @@ class Wallet extends Model {
   @AllowNull(false)
   @Column(DataType.ENUM('personal', 'business', 'savings'))
   type!: 'personal' | 'business' | 'savings';
-
-
+  
   @BeforeCreate
   static generateWalletAddress(instance: Wallet) {
     const uniqueAddress = crypto.randomBytes(20).toString('hex'); // 40-char hex string
     instance.walletAddress = `0x${uniqueAddress}`;
   }
+  
+  @HasMany(() => Transaction)
+  transactions!: Transaction[];
 }
 
 export default Wallet;

@@ -1,10 +1,11 @@
 import Wallet from '../models/WalletModel.model';
 import User from '../models/UserModel.model';
 import crypto from 'crypto';
+import Transaction from '../models/TransactionMOdel.model';
 
 export class WalletService {
     // Create a new wallet for a user
-    async createWallet(userId: number, type: 'personal' | 'business' | 'savings') {
+    async createWallet(userId: number, type: 'personal' | 'business' | 'savings', name: string) {
         const user = await User.findByPk(userId);
         if (!user) throw new Error('User not found');
 
@@ -17,6 +18,7 @@ export class WalletService {
             balance: 0,
             currency: 'NGN',
             type,
+            name,
             accountNumber: this.generateAccountNumber(),
             walletAddress: `0x${crypto.randomBytes(20).toString('hex')}`
 
@@ -31,12 +33,25 @@ export class WalletService {
 
     // Get wallet by wallet ID
     async getWalletById(walletId: number) {
-        return await Wallet.findByPk(walletId, { include: [User] });
+        return await Wallet.findByPk(walletId, {
+            include: [
+                User,
+                { model: Transaction, as: 'sentTransactions' },
+                { model: Transaction, as: 'receivedTransactions' }
+            ]
+        });
     }
 
     // Get wallet by user ID
     async getWalletByUserId(userId: number) {
-        return await Wallet.findOne({ where: { userId }, include: [User] });
+        return await Wallet.findOne({
+            where: { userId },
+            include: [
+                User,
+                { model: Transaction, as: 'sentTransactions' },
+                { model: Transaction, as: 'receivedTransactions' }
+            ]
+        });
     }
 
     // Fund a wallet
