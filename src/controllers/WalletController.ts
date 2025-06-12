@@ -12,7 +12,7 @@ export class WalletController {
     async createWallet(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userId = req.user?.id; // ✅ use the id from protect middleware
-            const { type, name } = req.body;           
+            const { type, name } = req.body;
 
             if (!userId) {
                 res.status(401).json({ message: 'Unauthorized: No user ID found' });
@@ -89,8 +89,8 @@ export class WalletController {
 
     async getWalletsByUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = Number(req.params.userId);
-            const wallets = await this.walletService.getWalletsByUser(userId);
+            const userId = req.user?.id;
+            const wallets = await this.walletService.getWalletsByUser(Number(userId));
             res.status(200).json(wallets);
         } catch (error) {
             next(error);

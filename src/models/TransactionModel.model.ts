@@ -36,15 +36,15 @@ export default class Transaction extends Model<Transaction> {
     @Column(DataType.INTEGER)
     fromWalletId!: number;
 
-    @BelongsTo(() => Wallet, 'fromWalletId')
-    fromWallet!: Wallet;
-
     @ForeignKey(() => Wallet)
     @AllowNull(true)
     @Column(DataType.INTEGER)
     toWalletId?: number;
 
-    @BelongsTo(() => Wallet, 'toWalletId')
+    @BelongsTo(() => Wallet, { foreignKey: 'fromWalletId', as: 'fromWallet' })
+    fromWallet!: Wallet;
+
+    @BelongsTo(() => Wallet, { foreignKey: 'toWalletId', as: 'toWallet' })
     toWallet?: Wallet;
 
     @AllowNull(false)

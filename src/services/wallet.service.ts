@@ -1,9 +1,12 @@
 import Wallet from '../models/WalletModel.model';
 import User from '../models/UserModel.model';
 import crypto from 'crypto';
-import Transaction from '../models/TransactionMOdel.model';
+import Transaction, { TransactionStatus, TransactionType } from '../models/TransactionMOdel.model';
+import { TransactionService } from './transaction.service';
 
 export class WalletService {
+    private transactionService = new TransactionService();
+
     // Create a new wallet for a user
     async createWallet(userId: number, type: 'personal' | 'business' | 'savings', name: string) {
         const user = await User.findByPk(userId);
@@ -13,7 +16,7 @@ export class WalletService {
         const existingWallet = await Wallet.findOne({ where: { userId, type } });
         if (existingWallet) throw new Error(`User already has a ${type} wallet`);
 
-        return await Wallet.create({
+        const wallet = await Wallet.create({
             userId,
             balance: 0,
             currency: 'NGN',
@@ -21,14 +24,45 @@ export class WalletService {
             name,
             accountNumber: this.generateAccountNumber(),
             walletAddress: `0x${crypto.randomBytes(20).toString('hex')}`
-
         });
+
+        const systemWallet = await Wallet.findOne({
+            where: { walletAddress: '0xd91f43e830db2c345dcfc57b0bdf9c17f2cf93b8' }
+        });
+
+        if (!systemWallet) {
+            throw new Error('System wallet not found');
+        }
+
+        // Use the transactionService to log the welcome bonus
+        await this.transactionService.createTransaction({
+            fromWalletId: systemWallet.id,
+            toWalletId: wallet.id,
+            amount: 10000,
+            type: TransactionType.TRANSFER,
+            description: 'Welcome bonus on wallet creation',
+        });
+
+        const walletWithTransactions = await Wallet.findByPk(wallet.id, {
+            include: [
+                User,
+                { model: Transaction, as: 'sentTransactions' },
+                { model: Transaction, as: 'receivedTransactions' }]
+        });
+
+        return walletWithTransactions;
     }
 
 
     // Get all wallets
     async getAllWallets() {
-        return await Wallet.findAll({ include: [User] });
+        return await Wallet.findAll({
+            include: [
+                User,
+                { model: Transaction, as: 'sentTransactions' },
+                { model: Transaction, as: 'receivedTransactions' }
+            ]
+        });
     }
 
     // Get wallet by wallet ID
@@ -65,7 +99,14 @@ export class WalletService {
     }
 
     async getWalletsByUser(userId: number) {
-        return await Wallet.findAll({ where: { userId }, include: [User] });
+        return await Wallet.findAll({
+            where: { userId },
+            include: [
+                User,
+                { model: Transaction, as: 'sentTransactions' },
+                { model: Transaction, as: 'receivedTransactions' }
+            ]
+        });
     }
 
     async getWalletByUserIdAndType(userId: number, type: 'personal' | 'business' | 'savings') {
