@@ -29,14 +29,14 @@ export default class User extends Model<User> {
 
     @Column({
         type: DataType.STRING(100),
-        unique: true,
+        unique: 'unique_user_email',
         allowNull: false,
     })
     email!: string;
 
     @Column({
         type: DataType.STRING(20),
-        unique: true,
+        unique: 'unique_user_phone',
         allowNull: false,
     })
     phone!: string;

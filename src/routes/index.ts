@@ -28,7 +28,7 @@ export function router(sequelize: Sequelize) {
     router.get('/wallets/:id', walletController.getWalletById.bind(walletController));
 
     // Get all wallets by user ID
-    router.get('/users/:userId/wallets', walletController.getWalletsByUser.bind(walletController));
+    router.get('/users/wallets', protect, walletController.getWalletsByUser.bind(walletController));
 
     // Get a specific wallet by user ID and wallet type (e.g., personal, business, savings)
     router.get('/users/:userId/wallets/:type', walletController.getWalletByUserIdAndType.bind(walletController));

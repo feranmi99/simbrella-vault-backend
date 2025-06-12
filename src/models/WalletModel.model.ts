@@ -54,15 +54,19 @@ class Wallet extends Model {
   @AllowNull(false)
   @Column(DataType.ENUM('personal', 'business', 'savings'))
   type!: 'personal' | 'business' | 'savings';
-  
+
   @BeforeCreate
   static generateWalletAddress(instance: Wallet) {
     const uniqueAddress = crypto.randomBytes(20).toString('hex'); // 40-char hex string
     instance.walletAddress = `0x${uniqueAddress}`;
   }
-  
-  @HasMany(() => Transaction)
-  transactions!: Transaction[];
+
+  @HasMany(() => Transaction, { foreignKey: 'fromWalletId', as: 'sentTransactions' })
+  sentTransactions!: Transaction[];
+
+  @HasMany(() => Transaction, { foreignKey: 'toWalletId', as: 'receivedTransactions' })
+  receivedTransactions!: Transaction[];
+
 }
 
 export default Wallet;
