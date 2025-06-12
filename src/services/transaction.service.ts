@@ -53,8 +53,8 @@ export class TransactionService {
 
     // Optional generic transaction creator
     async createTransaction(data: {
-        fromWalletId?: number;
-        toWalletId?: number;
+        fromWalletId: number;
+        toWalletId: number;
         amount: number;
         type: TransactionType;
         description?: string;
@@ -88,6 +88,7 @@ export class TransactionService {
                 // Create DEBIT transaction for sender
                 await Transaction.create({
                     fromWalletId,
+                    toWalletId,
                     amount,
                     type: TransactionType.DEBIT,
                     description: description || `Transfer to wallet ${toWalletId}`,
@@ -98,6 +99,7 @@ export class TransactionService {
                 // Create CREDIT transaction for receiver
                 await Transaction.create({
                     toWalletId,
+                    fromWalletId,
                     amount,
                     type: TransactionType.CREDIT,
                     description: description || `Transfer from wallet ${fromWalletId}`,

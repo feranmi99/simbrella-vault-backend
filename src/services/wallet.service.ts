@@ -15,7 +15,7 @@ export class WalletService {
         // Ensure user doesn't already have this type of wallet
         const existingWallet = await Wallet.findOne({ where: { userId, type } });
         if (existingWallet) throw new Error(`User already has a ${type} wallet`);
-
+        
         const wallet = await Wallet.create({
             userId,
             balance: 0,

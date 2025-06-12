@@ -37,7 +37,7 @@ export default class Transaction extends Model<Transaction> {
     fromWalletId!: number;
 
     @ForeignKey(() => Wallet)
-    @AllowNull(true)
+    @AllowNull(false)
     @Column(DataType.INTEGER)
     toWalletId?: number;
 
