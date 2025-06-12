@@ -12,10 +12,15 @@ export class WalletController {
     async createWallet(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userId = req.user?.id; // ✅ use the id from protect middleware
-            const { type } = req.body;           
+            const { type, name } = req.body;           
 
             if (!userId) {
                 res.status(401).json({ message: 'Unauthorized: No user ID found' });
+                return;
+            }
+
+            if (!name) {
+                res.status(400).json({ message: 'Invalid wallet name' });
                 return;
             }
 
@@ -25,7 +30,7 @@ export class WalletController {
                 return;
             }
 
-            const wallet = await this.walletService.createWallet(userId, type);
+            const wallet = await this.walletService.createWallet(userId, type, name);
             res.status(201).json(wallet);
         } catch (error) {
             next(error);

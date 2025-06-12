@@ -1,4 +1,15 @@
-import { Table, Column, Model, ForeignKey, DataType } from 'sequelize-typescript';
+import {
+    Table,
+    Column,
+    Model,
+    ForeignKey,
+    DataType,
+    BelongsTo,
+    AllowNull,
+    PrimaryKey,
+    AutoIncrement,
+    Default,
+} from 'sequelize-typescript';
 import Wallet from './WalletModel.model';
 
 export enum TransactionType {
@@ -7,32 +18,54 @@ export enum TransactionType {
     TRANSFER = 'transfer',
 }
 
-@Table({ tableName: 'transactions' })
+export enum TransactionStatus {
+    PENDING = 'pending',
+    COMPLETED = 'completed',
+    FAILED = 'failed',
+}
+
+@Table({ tableName: 'transactions', timestamps: true })
 export default class Transaction extends Model<Transaction> {
-    @Column({
-        type: DataType.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    })
+    @PrimaryKey
+    @AutoIncrement
+    @Column(DataType.INTEGER)
     id!: number;
 
     @ForeignKey(() => Wallet)
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @AllowNull(false)
+    @Column(DataType.INTEGER)
     fromWalletId!: number;
 
-    @ForeignKey(() => Wallet)
-    @Column({ type: DataType.INTEGER, allowNull: true })
-    toWalletId!: number;
+    @BelongsTo(() => Wallet, 'fromWalletId')
+    fromWallet!: Wallet;
 
-    @Column({ type: DataType.DECIMAL(15, 2), allowNull: false })
+    @ForeignKey(() => Wallet)
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    toWalletId?: number;
+
+    @BelongsTo(() => Wallet, 'toWalletId')
+    toWallet?: Wallet;
+
+    @AllowNull(false)
+    @Column(DataType.DECIMAL(15, 2))
     amount!: number;
 
-    @Column({
-        type: DataType.ENUM(...Object.values(TransactionType)),
-        allowNull: false,
-    })
+    @AllowNull(false)
+    @Column(DataType.ENUM(...Object.values(TransactionType)))
     type!: TransactionType;
 
-    @Column({ type: DataType.STRING })
-    description!: string;
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    description?: string;
+
+    @AllowNull(false)
+    @Default(DataType.NOW)
+    @Column(DataType.DATE)
+    date!: Date;
+
+    @AllowNull(false)
+    @Default(TransactionStatus.PENDING)
+    @Column(DataType.ENUM(...Object.values(TransactionStatus)))
+    status!: TransactionStatus;
 }
